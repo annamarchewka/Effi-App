@@ -1,7 +1,7 @@
 {% load bootstrap4 %}
 
 <!DOCTYPE html>
-<html>
+<html style="margin: 20px">
   <head>
     {% block head %}
       {% block style %}
@@ -9,7 +9,6 @@
     {% endblock%}
     {% endblock %}
   </head>
-  <body>
 
   <header>
 <nav class="navbar -nav" style="background-color: whitesmoke; color: black">
@@ -20,7 +19,7 @@
     <ul class="nav navbar-nav bg-light">
       <li class="active"><a style="color:black;text-decoration:none;" href="/accounts/profile/">Home</a></li>
       <li ><a style="color:black;text-decoration:none;" href='/tasks/{{ user.id }}'>Task management</a></li>
-      <li><a style="color:black;text-decoration:none;" href='/addtask/{{ user.id }}'>Create task</a></li>
+      <li><a style="color:black;text-decoration:none;" href='/addtask/'>Create task</a></li>
       <li><a style="color:black;text-decoration:none;" href='/score/{{ user.id }}'>Score</a></li>
       <li><a style="color:black;text-decoration:none;" href="{% url 'change_password' %}">Settings</a></li>
     </ul>
@@ -36,7 +35,9 @@
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-  </body>
+
+  <body>
+  <body/>
 </html>
 
 

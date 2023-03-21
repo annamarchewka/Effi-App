@@ -37,10 +37,6 @@ class Task(models.Model):
     done = models.IntegerField(default=1, null=True)
     status = models.IntegerField(choices=STATUS, default=1)
 
-class Task_history(models.Model):
-    task_name = models.ForeignKey(Task, on_delete=models.CASCADE)
-    done = models.IntegerField(default=1, null=True)
-
 def __str__(self):
     return self.task_name
 class Comment(models.Model):

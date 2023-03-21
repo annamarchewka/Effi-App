@@ -5,8 +5,8 @@ from django.views import View
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from .models import User_info, Group, Task, Subtask, Comment
-from .forms import SubtaskForm, CommentForm, AddForm, DeleteForm
+from .models import User_info, Task, Subtask, Comment
+from .forms import SubtaskForm, CommentForm, AddForm
 class LoginFormView(LoginView):
     template_name = 'login.html'
     success_url = 'main/'
@@ -55,12 +55,20 @@ class TaskView(View):
             task = Task.objects.get(pk=task_id)
             task.username_id = usernameid
             task.save()
+            points = task.points
+            user = User_info.objects.get(username_id=usernameid)
+            user.score = user.score + points
+            user.save()
             return redirect("tasks", usernameid=usernameid)
         elif 'mytask_id' in request.POST:
             mytask_id = request.POST.get('mytask_id')
             mytask = Task.objects.get(pk=mytask_id)
             mytask.username_id = None
             mytask.save()
+            points = mytask.points
+            user = User_info.objects.get(username_id=usernameid)
+            user.score = user.score - points
+            user.save()
             return redirect("tasks", usernameid=usernameid)
         elif 'othertask_id' in request.POST:
             othertask_id = request.POST.get('othertask_id')
@@ -72,16 +80,22 @@ class TaskView(View):
             donetask = Task.objects.get(pk=done_id)
             donetask.done = 0
             donetask.save()
-            user = donetask.username_id
-            return redirect("tasks", usernameid=user)
+            a = donetask.username_id
+            points = donetask.points
+            user = User_info.objects.get(username_id=usernameid)
+            user.score = user.score - points
+            user.save()
+            return redirect("tasks", usernameid=a)
 
 
 class TaskDetailView(View):
     def get(self, request, id):
         task = Task.objects.get(pk=id)
-        subtask = Subtask.objects.filter(task_id=id)
+        subtask1 = Subtask.objects.filter(task_id=id)
+        subtask = subtask1.order_by('id')
         form = SubtaskForm()
-        comments = Comment.objects.filter(task_name_id=id)
+        comments1 = Comment.objects.filter(task_name_id=id)
+        comments = comments1.order_by('-id')
         sec_form = CommentForm()
         return render(request, 'taskdetail.html', {'task': task, 'subtask': subtask, 'form': form, 'comments': comments, 'sec_form': sec_form})
     def post(self, request, id):
@@ -101,9 +115,17 @@ class TaskDetailView(View):
             return redirect("taskdetail", id=id)
         elif 'deltask' in request.POST:
             deltask = request.POST.get('deltask')
-            deletet = Task.objects.filter(pk=deltask)
+            deletet = Task.objects.get(pk=deltask)
             deletet.delete()
             user = request.user.id
+            points = deletet.points
+            u = deletet.username_id
+            if u == None:
+                pass
+            else:
+                user2 = User_info.objects.get(username_id=u)
+                user2.score = user2.score - points
+                user2.save()
             return redirect("tasks", usernameid=user)
         elif 'com' in request.POST:
             sec_form = CommentForm(request.POST)
@@ -117,17 +139,15 @@ class TaskDetailView(View):
             delcom = request.POST.get('delcom')
             delc = Comment.objects.filter(pk=delcom)
             delc.delete()
-            user = request.user.id
             return redirect("taskdetail", id=id)
 
 
 class AddTaskView(View):
-    def get(self, request, usernameid):
+    def get(self, request):
         all = Task.objects.all()
         form = AddForm()
-        second_form = DeleteForm()
         return render(request, 'addtask_form.html', {"form": form, 'all': all})
-    def post(self, request, usernameid):
+    def post(self, request):
         if 'addtask' in request.POST:
             form = AddForm(request.POST)
             if form.is_valid():
@@ -137,34 +157,38 @@ class AddTaskView(View):
                 estimated_time = form.cleaned_data['estimated_time']
                 points = form.cleaned_data['points']
                 status = form.cleaned_data['status']
+                usernameid = request.user.id
                 new = Task.objects.create(task_name=task_name, task_descr=task_descr, estimated_time=estimated_time, points=points, group_name_id=1, status=status, task_longdescr=task_longdescr)
                 return redirect("tasks", usernameid=usernameid)
             else:
                 return HttpResponse("Incorrect values. Check again")
 
+
 class ProfileView(View):
  def get(self, request, usernameid):
      profile = User_info.objects.get(pk=usernameid)
-     tasks = Task.objects.filter(username_id=usernameid).filter(done=1)
+     tasks = Task.objects.filter(done=1).filter(username_id=usernameid)
      histtasks = Task.objects.filter(username_id=usernameid).filter(done=0)
-     p = []
-     for i in tasks:
-         point = i.points
-         p.append(point)
-     score = sum(p)
-     profile.score = score
+     score = profile.score
      return render(request, 'profile.html', {'profile': profile, 'tasks': tasks, 'score': score, 'histtasks': histtasks})
 
 
-'''class ScoreView(View):
-    def get(self, request):
-        users = User_info.objects.all()
-        task_point = Task.objects.filter(done=1)
-        all_points = []
-        for i in task_point:
-            p = i.points
-            all_points.append(p)
-    return render(request, 'score.html', {'users': users})
+class ScoreView(View):
+    def get(self, request, usernameid):
+        user = User_info.objects.all()
+        users = user.order_by('-score')
+        tasks = Task.objects.filter(done=1)
+        points = []
+        for i in users:
+            score = i.score
+            points.append(score)
+            takenscore = sum(points)
+        points2 = []
+        for j in tasks:
+            score2 = j.points
+            points2.append(score2)
+            alltaskscore = sum(points2)
+        freescore = alltaskscore-takenscore
+        return render(request, 'score.html', {'users': users, 'takenscore': takenscore, 'alltaskscore': alltaskscore, 'freescore':freescore})
     def post(self, request):
         pass
-'''
