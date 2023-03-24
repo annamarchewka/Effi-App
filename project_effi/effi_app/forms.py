@@ -9,8 +9,13 @@ class AddForm(forms.Form):
     points = forms.IntegerField(label="Points", widget=forms.Select(choices=POINTS, attrs={'class': 'form-control', 'rows': 1}))
 class SubtaskForm(forms.Form):
     subtask = forms.CharField(label='', max_length=150)
-
 class CommentForm(forms.Form):
     content = forms.CharField(label='', widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3}))
 class DeleteForm(forms.Form):
     task_name = forms.CharField(label="Title:", widget=forms.Select(choices=TASKNAMES))
+class EditForm(forms.Form):
+    estimated_time = forms.IntegerField(label="Estimated time in hours", widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 1}))
+    status = forms.IntegerField(label='Urgency status', widget=forms.Select(choices=STATUS, attrs={'class': 'form-control', 'rows': 1}))
+    points = forms.IntegerField(label="Points", widget=forms.Select(choices=POINTS, attrs={'class': 'form-control', 'rows': 1}))
+class PhotoForm(forms.Form):
+    image = forms.ImageField(label='image')

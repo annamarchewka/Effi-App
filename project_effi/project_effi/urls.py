@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from effi_app.views import LoginFormView, MainView, TaskView, TaskDetailView, AddTaskView, ProfileView, logout_view, change_password, ScoreView
+from effi_app.views import LoginFormView, MainView, TaskView, TaskDetailView, AddTaskView, ProfileView, logout_view, change_password, ScoreView, EditView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -26,6 +26,8 @@ urlpatterns = [
     path('addtask/', AddTaskView.as_view(), name="addtask"),
     path('profile/<int:usernameid>/', ProfileView.as_view(), name="profile"),
     path('logout', logout_view, name='logout'),
-    path('change-password/', change_password, name='change_password'),
+    path('settings/', change_password, name='settings'),
     path('score/<int:usernameid>/', ScoreView.as_view(), name="score"),
+    path('edit/<int:id>/', EditView.as_view(), name="edit"),
+
 ]

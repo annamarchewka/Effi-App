@@ -6,7 +6,10 @@ from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from .models import User_info, Task, Subtask, Comment
-from .forms import SubtaskForm, CommentForm, AddForm
+from .forms import SubtaskForm, CommentForm, AddForm, EditForm, PhotoForm
+
+
+
 class LoginFormView(LoginView):
     template_name = 'login.html'
     success_url = 'main/'
@@ -87,7 +90,6 @@ class TaskView(View):
             user.save()
             return redirect("tasks", usernameid=a)
 
-
 class TaskDetailView(View):
     def get(self, request, id):
         task = Task.objects.get(pk=id)
@@ -140,6 +142,30 @@ class TaskDetailView(View):
             delc = Comment.objects.filter(pk=delcom)
             delc.delete()
             return redirect("taskdetail", id=id)
+        elif 'edit' in request.POST:
+            edittask = request.POST.get('edit')
+            return redirect("edit", id=edittask)
+
+class EditView(View):
+    def get(self, request, id):
+        task = Task.objects.get(pk=id)
+        form = EditForm()
+        return render(request, 'edit_form.html', {"form": form, 'task': task})
+    def post(self, request, id):
+        if 'edittask' in request.POST:
+            form = EditForm(request.POST)
+            if form.is_valid():
+                task = Task.objects.get(pk=id)
+                new_estimated_time = form.cleaned_data['estimated_time']
+                new_points = form.cleaned_data['points']
+                new_status = form.cleaned_data['status']
+                task.estimated_time = new_estimated_time
+                task.points = new_points
+                task.status = new_status
+                task.save()
+                return redirect("taskdetail", id=id)
+            else:
+                return HttpResponse("Incorrect values. Check again")
 
 
 class AddTaskView(View):
@@ -192,3 +218,14 @@ class ScoreView(View):
         return render(request, 'score.html', {'users': users, 'takenscore': takenscore, 'alltaskscore': alltaskscore, 'freescore':freescore})
     def post(self, request):
         pass
+
+
+def upload_photo(request):
+    if request.method == 'POST':
+        img_form = PhotoForm(request.POST, request.FILES)
+        if img_form.is_valid():
+            img_form.save()
+            return redirect('settings')
+    else:
+        img_form = PhotoForm()
+    return render(request, 'change_password.html', {'img_form': img_form})

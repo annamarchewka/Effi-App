@@ -16,6 +16,7 @@
            <input type="hidden" name="deltask" value="{{ task.id }}">
            <button class="btn btn-outline-light btn-md px-5" type="submit">DELETE</button>
        </form>
+
 </br>
 </br>
 </br>
@@ -34,6 +35,15 @@
 <b>Owner: </b> <a style="color:black;text-decoration:none;" href="/profile/{{ task.username_id }}">{{ task.username.name_surname }}</a>
 </li>
 </ul>
+
+<form class='col-sm-10' method="post" action="">
+           {% csrf_token %}
+           <input type="hidden" name="edit" value="{{ task.id }}">
+           <button class="btn btn-outline-light btn-md px-5" type="submit">EDIT</button>
+       </form>
+
+</br>
+</br>
 </br>
 
 <section class="container-fluid" style="border-style:hidden;background-color:antiquewhite">
